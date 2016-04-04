@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>JAX-RS vs servlet</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Test performcance between JAX-RS and servlet">
+    <meta name="author" content="Lars Michaelis">
+
+    <!--link rel="stylesheet" type="text/css" href="/larmic-chat/resources/css/normalize.css"-->
+
+    <script type="text/javascript" src="resources/jquery.min.js"></script>
+</head>
+<body>
+Hello
+
+<script>
+    $(document).ready(function () {
+        var numberOfServerCalls = 10000;
+
+        callService(numberOfServerCalls, '/rest/simpleRestEndpoint', 'jax-rs');
+        callService(numberOfServerCalls, '/simpleServlet', 'servlet');
+    });
+
+    function callService(/* int */ numberOfServiceCalls, /* string */ servletUrl, /* string */ servletName) {
+        var startTime = Date.now();
+        var i = 0;
+        var numberOfAsyncRequest = 0;
+        var responses = 0;
+        var maxNumberOfServiceCalls = numberOfServiceCalls;
+
+        var intervall = setInterval(function () {
+            if (i < (maxNumberOfServiceCalls-1)) {
+                async(function () {
+                    $.ajax({
+                        url: '/restvsservlet' + servletUrl,
+                        type: 'PUT',
+                        beforeSend: function () {
+                            i++;
+                            numberOfAsyncRequest++;
+                        },
+                        success: function (result) {
+                            responses++;
+                            numberOfAsyncRequest--;
+                            if (responses >= numberOfServiceCalls) {
+                                log(servletName, startTime, responses);
+                            }
+                            //alert(result);
+                            //console.log(startTime);
+                            //console.log(endTime);
+                        }
+                    });
+                });
+            } else {
+                clearInterval(intervall);
+            }
+        }, 0);
+    }
+
+    function async(callback) {
+        setTimeout(function () {
+            if (callback) {
+                callback();
+            }
+        }, 0);
+    }
+
+    function sendAjax(/* function */ callback) {
+        console.log('ding2');
+        callback();
+    }
+
+    function log(/* string */ url, /* int */ startTime, /* int */ numberOfServiceCalls) {
+        var endTime = Date.now();
+        //console.log(startTime);
+        //console.log(endTime);
+        console.log(numberOfServiceCalls + ' calls of ' + url + ' takes ' + (endTime - startTime) + ' milli seconds');
+    }
+</script>
+</body>
+</html>
