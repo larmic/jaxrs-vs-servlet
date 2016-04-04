@@ -17,12 +17,14 @@
 
 <div class="container">
     <div class="progress progress-jax-rs">
-        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0"
+             aria-valuemax="100">
             0% (JAX-RS)
         </div>
     </div>
     <div class="progress progress-servlet">
-        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0"
+             aria-valuemax="100">
             0% (Servlet)
         </div>
     </div>
@@ -32,12 +34,12 @@
     $(document).ready(function () {
         var numberOfServerCalls = 10000;
 
-        callService(numberOfServerCalls, '/rest/simpleRestEndpoint', 'jax-rs', '.progress-jax-rs');
-
-        //callService(numberOfServerCalls, '/simpleServlet', 'servlet', '.progress-servlet');
+        callService(numberOfServerCalls, '/rest/simpleRestEndpoint', 'jax-rs', '.progress-jax-rs', function () {
+            callService(numberOfServerCalls, '/simpleServlet', 'servlet', '.progress-servlet');
+        });
     });
 
-    function callService(/* int */ numberOfServiceCalls, /* string */ servletUrl, /* string */ servletName, /* string */ progressBarSelector) {
+    function callService(/* int */ numberOfServiceCalls, /* string */ servletUrl, /* string */ servletName, /* string */ progressBarSelector, /* function */ callback) {
         var startTime = Date.now();
         var i = 0;
         var numberOfAsyncRequest = 0;
@@ -45,7 +47,7 @@
         var maxNumberOfServiceCalls = numberOfServiceCalls;
 
         var intervall = setInterval(function () {
-            if (i < (maxNumberOfServiceCalls-1)) {
+            if (i < (maxNumberOfServiceCalls - 1)) {
                 async(function () {
                     $.ajax({
                         url: '/restvsservlet' + servletUrl,
@@ -59,7 +61,7 @@
                             var percent = Math.round((responses / numberOfServiceCalls) * 100);
                             var $bar = $(progressBarSelector).find('.progress-bar');
                             $bar.removeClass('progress-bar-success').removeClass('progress-bar-info').removeClass('progress-bar-warning').removeClass('progress-bar-danger');
-                            $bar.css('width', percent+'%').attr('aria-valuenow', percent).html(percent + '% (' + servletName + ')');
+                            $bar.css('width', percent + '%').attr('aria-valuenow', percent).html(percent + '% (' + servletName + ')');
 
                             if (percent < 34) {
                                 $bar.addClass('progress-bar-danger');
@@ -74,6 +76,9 @@
                             numberOfAsyncRequest--;
                             if (responses >= numberOfServiceCalls) {
                                 log(servletName, startTime, responses);
+                                if (callback) {
+                                    callback();
+                                }
                             }
                             //alert(result);
                             //console.log(startTime);
