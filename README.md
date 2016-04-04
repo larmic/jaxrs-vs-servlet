@@ -22,3 +22,11 @@ protected void doPut(HttpServletRequest req, HttpServletResponse response) throw
 ```
 
 Comparing this plain text should measure JAX-RS overhead.
+
+# Getting started
+
+```
+mvn clean package tomcat7:run
+```
+
+and open http://localhost:8080/restvsservlet/
