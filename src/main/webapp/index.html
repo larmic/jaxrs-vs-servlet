@@ -8,34 +8,44 @@
     <meta name="description" content="Test performcance between JAX-RS and servlet">
     <meta name="author" content="Lars Michaelis">
 
-    <link rel="stylesheet" type="text/css" href="resources/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="resources/custom.css">
+    <link rel="stylesheet" type="text/css" href="resources/fontawesome/css/font-awesome.min.css">
 
     <script type="text/javascript" src="resources/jquery.min.js"></script>
-    <script type="text/javascript" src="resources/bootstrap/js/bootstrap.min.js"></script>
 </head>
 <body>
 
 <div class="container">
-    <div class="progress progress-jax-rs">
-        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0"
-             aria-valuemax="100">
-            0% (JAX-RS)
+    <div class="panel">
+        <div class="panel-heading">
+            jax-rs vs. plain servlet performance measurement
+        </div>
+        <div class="panel-body">
+            <div class="test-item jax-rs-put">
+                <i class="fa fa-times text-danger"></i>
+                <div>
+                    <b>JAX-RS PUT</b>
+                    <span class="test-item-content">not yet running</span>
+                </div>
+            </div>
+            <div class="test-item servlet-put">
+                <i class="fa fa-times text-danger"></i>
+                <div>
+                    <b>Servlet PUT</b>
+                    <span class="test-item-content">not yet running</span>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="progress progress-servlet">
-        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0"
-             aria-valuemax="100">
-            0% (Servlet)
-        </div>
-    </div>
+
 </div>
 
 <script>
     $(document).ready(function () {
-        var numberOfServerCalls = 10000;
+        var numberOfServerCalls = 1000;
 
-        callService(numberOfServerCalls, '/rest/simpleRestEndpoint', 'jax-rs', '.progress-jax-rs', function () {
-            callService(numberOfServerCalls, '/simpleServlet', 'servlet', '.progress-servlet');
+        callService(numberOfServerCalls, '/rest/simpleRestEndpoint', 'jax-rs', '.jax-rs-put', function () {
+            callService(numberOfServerCalls, '/simpleServlet', 'servlet', '.servlet-put');
         });
     });
 
@@ -59,9 +69,12 @@
                         success: function (result) {
                             responses++;
                             var percent = Math.round((responses / numberOfServiceCalls) * 100);
-                            var $bar = $(progressBarSelector).find('.progress-bar');
-                            $bar.removeClass('progress-bar-success').removeClass('progress-bar-info').removeClass('progress-bar-warning').removeClass('progress-bar-danger');
-                            $bar.css('width', percent + '%').attr('aria-valuenow', percent).html(percent + '% (' + servletName + ')');
+                            var $bar = $(progressBarSelector);
+                            var $barContent = $bar.find('.test-item-content');
+                            $barContent.html(percent + '% (' + servletName + ')');
+                            $bar.find('.fa').removeClass('fa-times').addClass('fa-spinner').addClass('fa-spin').removeClass('text-danger');
+                            //$bar.removeClass('progress-bar-success').removeClass('progress-bar-info').removeClass('progress-bar-warning').removeClass('progress-bar-danger');
+                            //$bar.css('width', percent + '%').attr('aria-valuenow', percent).html(percent + '% (' + servletName + ')');
 
                             if (percent < 34) {
                                 $bar.addClass('progress-bar-danger');
@@ -75,14 +88,15 @@
 
                             numberOfAsyncRequest--;
                             if (responses >= numberOfServiceCalls) {
-                                log(servletName, startTime, responses);
+                                var endTime = Date.now();
+                                var timeInMillis = (endTime - startTime);
+                                $bar.find('.fa').removeClass('fa-spinner').removeClass('fa-spin').removeClass('fa-times').addClass('fa-check').removeClass('text-danger').addClass('text-success');
+                                $barContent.html(numberOfServiceCalls + ' calls of ' + servletName + ' takes ' + timeInMillis + ' milli seconds');
+                                //console.log(numberOfServiceCalls + ' calls of ' + servletName + ' takes ' + timeInMillis + ' milli seconds');
                                 if (callback) {
                                     callback();
                                 }
                             }
-                            //alert(result);
-                            //console.log(startTime);
-                            //console.log(endTime);
                         }
                     });
                 });
@@ -98,18 +112,6 @@
                 callback();
             }
         }, 0);
-    }
-
-    function sendAjax(/* function */ callback) {
-        console.log('ding2');
-        callback();
-    }
-
-    function log(/* string */ url, /* int */ startTime, /* int */ numberOfServiceCalls) {
-        var endTime = Date.now();
-        //console.log(startTime);
-        //console.log(endTime);
-        console.log(numberOfServiceCalls + ' calls of ' + url + ' takes ' + (endTime - startTime) + ' milli seconds');
     }
 </script>
 </body>
