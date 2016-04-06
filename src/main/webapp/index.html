@@ -20,11 +20,21 @@
         <div class="panel-heading">
             jax-rs vs. plain servlet performance measurement
         </div>
+        <div class="panel-body alert alert-success">
+            This demo sends <i class="iterations">1000</i> asynchronous requests to a plain serlvet a simple jax-rs servlet to measure jax-rs overhead.
+        </div>
         <div class="panel-body">
             <div class="test-item jax-rs-put">
                 <i class="fa fa-times text-danger"></i>
                 <div>
                     <b>JAX-RS PUT</b>
+                    <span class="test-item-content">not yet running</span>
+                </div>
+            </div>
+            <div class="test-item jax-rs-get">
+                <i class="fa fa-times text-danger"></i>
+                <div>
+                    <b>JAX-RS GET</b>
                     <span class="test-item-content">not yet running</span>
                 </div>
             </div>
@@ -35,6 +45,13 @@
                     <span class="test-item-content">not yet running</span>
                 </div>
             </div>
+            <div class="test-item servlet-get">
+                <i class="fa fa-times text-danger"></i>
+                <div>
+                    <b>Servlet GET</b>
+                    <span class="test-item-content">not yet running</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -42,26 +59,33 @@
 
 <script>
     $(document).ready(function () {
-        var numberOfServerCalls = 1000;
+        var numberOfServerCalls = 10000;
 
-        callService(numberOfServerCalls, '/rest/simpleRestEndpoint', 'jax-rs', '.jax-rs-put', function () {
-            callService(numberOfServerCalls, '/simpleServlet', 'servlet', '.servlet-put');
+        $('.iterations').html(numberOfServerCalls);
+
+        callService(numberOfServerCalls, '/rest/simpleRestEndpoint', 'PUT', 'jax-rs', '.jax-rs-put', function () {
+            callService(numberOfServerCalls, '/rest/simpleRestEndpoint', 'GET', 'jax-rs', '.jax-rs-get', function () {
+                callService(numberOfServerCalls, '/simpleServlet', 'PUT', 'servlet', '.servlet-put', function() {
+                    callService(numberOfServerCalls, '/simpleServlet', 'GET', 'servlet', '.servlet-get');
+                });
+            });
         });
     });
 
-    function callService(/* int */ numberOfServiceCalls, /* string */ servletUrl, /* string */ servletName, /* string */ progressBarSelector, /* function */ callback) {
+    function callService(/* int */ numberOfServiceCalls, /* string */ servletUrl, /* string */ requestType, /* string */ servletName, /* string */ progressBarSelector, /* function */ callback) {
         var startTime = Date.now();
         var i = 0;
         var numberOfAsyncRequest = 0;
         var responses = 0;
         var maxNumberOfServiceCalls = numberOfServiceCalls;
+        var type = requestType;
 
         var intervall = setInterval(function () {
             if (i < (maxNumberOfServiceCalls - 1)) {
                 async(function () {
                     $.ajax({
                         url: '/restvsservlet' + servletUrl,
-                        type: 'PUT',
+                        type: type,
                         beforeSend: function () {
                             i++;
                             numberOfAsyncRequest++;
