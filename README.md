@@ -29,4 +29,10 @@ Comparing this plain text should measure JAX-RS overhead.
 mvn clean package tomcat7:run
 ```
 
+or 
+
+```
+mvn clean package wildfly-swarm:run
+```
+
 and open http://localhost:8080/restvsservlet/

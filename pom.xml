@@ -15,6 +15,7 @@
 
         <resteasy-jaxrs.version>3.0.14.Final</resteasy-jaxrs.version>
         <javax.servlet-api.version>3.0.1</javax.servlet-api.version>
+        <wildfly-swarm-plugin.version>1.0.0.Beta7</wildfly-swarm-plugin.version>
     </properties>
 
     <packaging>war</packaging>
@@ -30,11 +31,13 @@
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-jaxrs</artifactId>
             <version>${resteasy-jaxrs.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-servlet-initializer</artifactId>
             <version>${resteasy-jaxrs.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -49,6 +52,30 @@
                     <server>localhost</server>
                     <path>/restvsservlet</path>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jboss.resteasy</groupId>
+                        <artifactId>resteasy-jaxrs</artifactId>
+                        <version>${resteasy-jaxrs.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.jboss.resteasy</groupId>
+                        <artifactId>resteasy-servlet-initializer</artifactId>
+                        <version>${resteasy-jaxrs.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.wildfly.swarm</groupId>
+                <artifactId>wildfly-swarm-plugin</artifactId>
+                <version>${wildfly-swarm-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
